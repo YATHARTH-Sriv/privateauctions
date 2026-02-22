@@ -129,3 +129,7 @@ Our comprehensive integration test suite rigorously verifies both the standard L
     derives correct permission PDA
 
 ```
+
+Frontend IS NOT FULLY WORKING BUT WE COVER THE TESTS EXTENSIVELY 
+
+    anchor test
