@@ -10,7 +10,7 @@ pub mod state;
 
 use handlers::*;
 
-declare_id!("AjZJtNbxPzGod46tFacPAugCsNte9dnkTbJncc8MUtcA");
+declare_id!("DahAM1GyX34r7kBuSAwKGpgLCG7XkyVrwheCo8P53VWC");
 
 #[ephemeral]
 #[program]
