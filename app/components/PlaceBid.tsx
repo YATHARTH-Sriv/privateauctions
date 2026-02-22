@@ -47,9 +47,14 @@ export default function PlaceBid({ auctionPda }: { auctionPda: string }) {
                 />
             </div>
 
-            <p className="text-xs text-muted-foreground">
-                Your bid is hashed on-chain. The amount and nonce are stored locally for later reveal.
-            </p>
+            <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+                <p className="text-xs text-red-400 font-medium">⚠️ Critical Warning</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                    Your bid amount and nonce are stored locally in this browser.
+                    <strong className="text-foreground"> Do not clear your cache or switch browsers </strong>
+                    until the auction is finalized, or you will not be able to reveal your bid.
+                </p>
+            </div>
 
             <button
                 onClick={handleBid}

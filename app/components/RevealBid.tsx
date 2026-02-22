@@ -48,6 +48,14 @@ export default function RevealBid({ auctionPda }: { auctionPda: string }) {
                 </p>
             )}
 
+            <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3">
+                <p className="text-xs text-blue-400 font-medium">ℹ️ Tie-Breaker Policy</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                    If multiple users submit the exact same highest bid amount, the winner is determined by
+                    <strong className="text-foreground"> whoever reveals their bid first </strong> on the Ephemeral Rollup.
+                </p>
+            </div>
+
             <button
                 onClick={handleReveal}
                 disabled={loading || !wallet || !hasBid}

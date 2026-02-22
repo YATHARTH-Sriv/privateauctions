@@ -4,7 +4,7 @@ import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 import React, { FC, ReactNode, useMemo } from 'react';
-import { DEVNET_RPC_URL } from '@/lib/constants';
+import { DEVNET_RPC_URL, LOCALNET_RPC_URL } from '@/lib/constants';
 
 import '@solana/wallet-adapter-react-ui/styles.css';
 

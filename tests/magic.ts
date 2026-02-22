@@ -172,7 +172,7 @@ describe("magic — core auction lifecycle (devnet)", function () {
         let auction = await program.account.auction.fetch(auctionPda);
         expect(auction.auctionId.toNumber()).to.equal(auctionId.toNumber());
         expect(auction.status).to.deep.equal({ bidding: {} });
-        console.log("    ✅ Auction created:", auctionPda.toBase58());
+        console.log("     Auction created:", auctionPda.toBase58());
 
         // Wait for bidding to start
         await waitUntilOnchainUnix(provider.connection, startTs.toNumber());
@@ -201,7 +201,7 @@ describe("magic — core auction lifecycle (devnet)", function () {
         const bid = await program.account.bid.fetch(bidPda);
         expect(bid.revealed).to.equal(false);
         expect(bid.amount.toNumber()).to.equal(0);
-        console.log("    ✅ Sealed bid submitted");
+        console.log("     Sealed bid submitted");
 
         // Wait for reveal phase
         await waitUntilOnchainUnix(provider.connection, endTs.toNumber());
@@ -220,7 +220,7 @@ describe("magic — core auction lifecycle (devnet)", function () {
         const revealedBid = await program.account.bid.fetch(bidPda);
         expect(revealedBid.revealed).to.equal(true);
         expect(revealedBid.amount.toNumber()).to.equal(100);
-        console.log("    ✅ Bid revealed: amount =", revealedBid.amount.toNumber());
+        console.log("     Bid revealed: amount =", revealedBid.amount.toNumber());
 
         // Wait for reveal window to close
         await waitUntilOnchainUnix(provider.connection, revealEndTs.toNumber());
@@ -240,7 +240,7 @@ describe("magic — core auction lifecycle (devnet)", function () {
         expect(auction.totalBids).to.equal(1);
         expect(auction.totalRevealed).to.equal(1);
         expect(auction.status).to.deep.equal({ finalized: {} });
-        console.log("    ✅ Auction finalized — winner:", auction.highestBidder?.toBase58());
+        console.log("     Auction finalized — winner:", auction.highestBidder?.toBase58());
     });
 
     it("rejects bid with invalid hash on reveal", async () => {
@@ -293,7 +293,7 @@ describe("magic — core auction lifecycle (devnet)", function () {
             expect.fail("Should have thrown InvalidReveal error");
         } catch (err: any) {
             expect(err.error.errorCode.code).to.equal("InvalidReveal");
-            console.log("    ✅ Invalid reveal correctly rejected");
+            console.log("     Invalid reveal correctly rejected");
         }
     });
 
@@ -378,7 +378,7 @@ describe("magic — core auction lifecycle (devnet)", function () {
         expect(auction.highestBidder?.toBase58()).to.equal(bidder2.publicKey.toBase58());
         expect(auction.totalBids).to.equal(2);
         expect(auction.totalRevealed).to.equal(2);
-        console.log("    ✅ Highest bidder:", bidder2.publicKey.toBase58(), "with bid 200");
+        console.log("     Highest bidder:", bidder2.publicKey.toBase58(), "with bid 200");
     });
 
     it("enforces reserve price — no winner if all bids below reserve", async () => {
@@ -437,7 +437,7 @@ describe("magic — core auction lifecycle (devnet)", function () {
         const auction = await program.account.auction.fetch(auctionPda);
         expect(auction.highestBidder).to.be.null;
         expect(auction.status).to.deep.equal({ finalized: {} });
-        console.log("    ✅ Reserve enforced — no winner (bid 100 < reserve 500)");
+        console.log("     Reserve enforced — no winner (bid 100 < reserve 500)");
     });
 });
 
@@ -471,19 +471,19 @@ describe("magic — private bidding with MagicBlock PER", function () {
             program.programId
         );
 
-        console.log("    📋 Auction PDA:", auctionPda.toBase58());
-        console.log("    🌐 Validator:", VALIDATOR.toBase58());
+        console.log("     Auction PDA:", auctionPda.toBase58());
+        console.log("     Validator:", VALIDATOR.toBase58());
 
         // Step 1: Create auction
-        console.log("\n    📝 Step 1: Creating auction on localnet...");
+        console.log("\n    Step 1: Creating auction on localnet...");
         await program.methods
             .createAuction(auctionId, startTs, endTs, revealEndTs, reservePrice)
             .accounts({ auction: auctionPda, authority, systemProgram: SystemProgram.programId } as any)
             .rpc();
-        console.log("    ✅ Auction created");
+        console.log("     Auction created");
 
         // Step 2: Create permission via our program's CPI wrapper
-        console.log("\n    🔐 Step 2: Creating permission...");
+        console.log("\n     Step 2: Creating permission...");
         const permissionPda = permissionPdaFromAccount(auctionPda);
 
         await program.methods
@@ -496,7 +496,7 @@ describe("magic — private bidding with MagicBlock PER", function () {
                 systemProgram: SystemProgram.programId,
             } as any)
             .rpc();
-        console.log("    ✅ Permission created:", permissionPda.toBase58());
+        console.log("     Permission created:", permissionPda.toBase58());
 
         // Step 3: Prepare bidder + bid account on L1 (required before delegated ER writes)
         const bidder = Keypair.generate();
@@ -507,7 +507,7 @@ describe("magic — private bidding with MagicBlock PER", function () {
         );
         const bidPermissionPda = permissionPdaFromAccount(bidPda);
 
-        console.log("\n    🧱 Step 3: Initializing bid account on L1...");
+        console.log("\n     Step 3: Initializing bid account on L1...");
         await program.methods
             .initializeBidAccount()
             .accounts({
@@ -519,10 +519,10 @@ describe("magic — private bidding with MagicBlock PER", function () {
             } as any)
             .signers([bidder])
             .rpc();
-        console.log("    ✅ Bid account initialized:", bidPda.toBase58());
+        console.log("     Bid account initialized:", bidPda.toBase58());
 
         // Step 4: Create bid permission via on-chain CPI (program must sign for bid PDA)
-        console.log("\n    🔐 Step 4: Creating bid permission...");
+        console.log("\n     Step 4: Creating bid permission...");
         await program.methods
             .createBidPermission()
             .accounts({
@@ -534,10 +534,10 @@ describe("magic — private bidding with MagicBlock PER", function () {
             } as any)
             .signers([bidder])
             .rpc();
-        console.log("    ✅ Bid permission created:", bidPermissionPda.toBase58());
+        console.log("     Bid permission created:", bidPermissionPda.toBase58());
 
         // Step 5: Delegate auction permission to validator
-        console.log("\n    🔗 Step 5: Delegating auction permission...");
+        console.log("\n     Step 5: Delegating auction permission...");
         const delegatePermIx = createDelegatePermissionInstruction({
             payer: authority,
             authority: [authority, true],
@@ -548,10 +548,10 @@ describe("magic — private bidding with MagicBlock PER", function () {
 
         const tx1 = new Transaction().add(delegatePermIx);
         await provider.sendAndConfirm(tx1);
-        console.log("    ✅ Auction permission delegated");
+        console.log("     Auction permission delegated");
 
         // Step 6: Delegate bid permission to validator
-        console.log("\n    🔗 Step 6: Delegating bid permission...");
+        console.log("\n     Step 6: Delegating bid permission...");
         const delegateBidPermIx = createDelegatePermissionInstruction({
             payer: bidder.publicKey,
             authority: [bidder.publicKey, true],
@@ -561,10 +561,10 @@ describe("magic — private bidding with MagicBlock PER", function () {
         });
         const txBidPerm = new Transaction().add(delegateBidPermIx);
         await provider.sendAndConfirm(txBidPerm, [bidder]);
-        console.log("    ✅ Bid permission delegated");
+        console.log("     Bid permission delegated");
 
         // Step 7: Delegate auction PDA to ER (SDK #[delegate] macro auto-generates accounts)
-        console.log("\n    🔗 Step 7: Delegating auction PDA to ER...");
+        console.log("\n     Step 7: Delegating auction PDA to ER...");
         await program.methods
             .delegateAuction(authority, auctionId)
             .accounts({
@@ -573,10 +573,10 @@ describe("magic — private bidding with MagicBlock PER", function () {
                 validator: VALIDATOR,
             } as any)
             .rpc();
-        console.log("    ✅ Auction PDA delegated");
+        console.log("     Auction PDA delegated");
 
         // Step 8: Delegate bid PDA to ER
-        console.log("\n    🔗 Step 8: Delegating bid PDA to ER...");
+        console.log("\n     Step 8: Delegating bid PDA to ER...");
         await program.methods
             .delegateBid(auctionPda, bidder.publicKey)
             .accounts({
@@ -586,14 +586,14 @@ describe("magic — private bidding with MagicBlock PER", function () {
             } as any)
             .signers([bidder])
             .rpc();
-        console.log("    ✅ Bid PDA delegated");
+        console.log("     Bid PDA delegated");
 
         // Step 9: Submit private bid over local PER endpoint
-        console.log("\n    🤫 Step 9: Submitting private bid via local PER...");
+        console.log("\n    Step 9: Submitting private bid via local PER...");
         const erConnection = new Connection(ER_RPC, "confirmed");
 
         const waitTime = Math.max(startTs.toNumber() - Math.floor(Date.now() / 1000), 0);
-        console.log(`    ⏳ Waiting ${waitTime}s for bidding to start...`);
+        console.log(`     Waiting ${waitTime}s for bidding to start...`);
         await waitUntilOnchainUnix(provider.connection, startTs.toNumber());
 
         const bidAmount = new anchor.BN(100);
@@ -616,14 +616,14 @@ describe("magic — private bidding with MagicBlock PER", function () {
         delegatedBidTx.partialSign(bidder);
         const fullySignedDelegatedBidTx = await provider.wallet.signTransaction(delegatedBidTx);
         const perSig = await erConnection.sendRawTransaction(fullySignedDelegatedBidTx.serialize());
-        console.log("    ✅ Private bid submitted via ER! Sig:", perSig);
+        console.log("     Private bid submitted via ER! Sig:", perSig);
 
         // Step 10: Verify delegated state is reflected on PER
         const erProvider = new anchor.AnchorProvider(erConnection, provider.wallet, { commitment: "confirmed" });
         const erProgram = new Program<Magic>(program.idl, erProvider);
         const erAuction = await erProgram.account.auction.fetch(auctionPda);
         const erBid = await erProgram.account.bid.fetch(bidPda);
-        console.log("    ✅ ER auction readable. totalBids:", erAuction.totalBids);
+        console.log("     ER auction readable. totalBids:", erAuction.totalBids);
         expect(erAuction.auctionId.toString()).to.equal(auctionId.toString());
         expect(erAuction.totalBids).to.equal(1);
         expect(erBid.committed).to.equal(true);
@@ -649,10 +649,10 @@ describe("magic — private bidding with MagicBlock PER", function () {
         const erBidAfterReveal = await erProgram.account.bid.fetch(bidPda);
         expect(erBidAfterReveal.revealed).to.equal(true);
         expect(erBidAfterReveal.amount.toNumber()).to.equal(100);
-        console.log("    ✅ Bid revealed on ER");
+        console.log("     Bid revealed on ER");
 
         // Step 12: Finalize auction on ER
-        console.log("\n    🧮 Step 12: Finalizing auction on ER...");
+        console.log("\n     Step 12: Finalizing auction on ER...");
         await waitUntilOnchainUnix(erConnection, revealEndTs.toNumber());
         await erProgram.methods
             .finalizeAuction()
@@ -667,10 +667,10 @@ describe("magic — private bidding with MagicBlock PER", function () {
         expect(erFinalizedAuction.highestBidder?.toBase58()).to.equal(
             bidder.publicKey.toBase58()
         );
-        console.log("    ✅ Auction finalized on ER");
+        console.log("     Auction finalized on ER");
 
         // Step 13: Commit + undelegate auction back to L1 (#[commit] auto-generates magic accounts)
-        console.log("\n    📦 Step 13: Commit + undelegate auction to L1...");
+        console.log("\n     Step 13: Commit + undelegate auction to L1...");
         await erProgram.methods
             .finalizeAndSettle()
             .accounts({
@@ -679,10 +679,10 @@ describe("magic — private bidding with MagicBlock PER", function () {
                 payer: authority,
             } as any)
             .rpc();
-        console.log("    ✅ Auction committed/undelegated");
+        console.log("     Auction committed/undelegated");
 
         // Step 14: Verify final state visible on base layer
-        console.log("\n    ✅ Step 14: Verifying settled state on L1...");
+        console.log("\n     Step 14: Verifying settled state on L1...");
         const l1Auction = await waitForAuctionFinalizedOnL1(program, auctionPda);
         expect(l1Auction.status).to.deep.equal({ finalized: {} });
         expect(l1Auction.totalBids).to.equal(1);
@@ -691,9 +691,9 @@ describe("magic — private bidding with MagicBlock PER", function () {
         expect(l1Auction.highestBidder?.toBase58()).to.equal(
             bidder.publicKey.toBase58()
         );
-        console.log("    ✅ L1 settled state verified");
+        console.log("     L1 settled state verified");
 
-        console.log("\n    🎉 Private bidding infrastructure verified!");
+        console.log("\n    Private bidding infrastructure verified!");
     });
 });
 
@@ -719,13 +719,13 @@ describe("per hooks — SDK helpers", () => {
         expect(
             createPermissionIx.keys[1].pubkey.equals(permissionPdaFromAccount(permissionedAccount))
         ).to.equal(true);
-        console.log("    ✅ SDK permission instruction builder works");
+        console.log("     SDK permission instruction builder works");
     });
 
     it("derives correct permission PDA", () => {
         const account = Keypair.generate().publicKey;
         const pda = permissionPdaFromAccount(account);
         expect(pda).to.be.instanceOf(PublicKey);
-        console.log("    ✅ Permission PDA derived:", pda.toBase58());
+        console.log("     Permission PDA derived:", pda.toBase58());
     });
 });
